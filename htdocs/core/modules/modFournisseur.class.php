@@ -143,6 +143,14 @@ class modFournisseur extends DolibarrModules
 		$this->rights[$r][4] = 'lire';
 
 		$r++;
+		$this->rights[$r][0] = 1238;
+		$this->rights[$r][1] = 'Read all supplier (and their objects) by internal users (otherwise only if commercial contact). Not effective for external users (limited to themselves).';
+		$this->rights[$r][2] = 'r';
+		$this->rights[$r][3] = 0;
+		$this->rights[$r][4] = 'supplier_read_advance';      // Visible if option MAIN_USE_ADVANCED_PERMS is on
+		$this->rights[$r][5] = 'read';
+
+		$r++;
 		$this->rights[$r][0] = 1182;
 		$this->rights[$r][1] = 'Consulter les commandes fournisseur';
 		$this->rights[$r][2] = 'r';
