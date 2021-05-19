@@ -1646,8 +1646,8 @@ class pdf_azur extends ModelePDFPropales
 		}
 		if (!empty($conf->global->DOC_SHOW_WAREHOUSE)) {
 			$pdf->RoundedRect($posx , $posy, $width , 20, 3, '1111', '');
-			$pdf->RoundedRect($posx , $posy, $width , 5, 3, '1001', 'F');
-			$pdf->MultiCell($width, 5, $langs->trans("Wharehouse"), '', 'C');
+			$pdf->RoundedRect($posx , $posy, $width , 3, 3, '1001', 'F');
+			$pdf->MultiCell($width, 3, $langs->trans("Wharehouse"), '', 'C');
 			$warehouse = new Entrepot($this->db);
 			$warehouse->fetch($object->fk_warehouse);
 			var_dump($object->fk_warehouse);
@@ -1662,8 +1662,8 @@ class pdf_azur extends ModelePDFPropales
 			$pdf->SetTextColor(0, 0, 60);
 
 			$pdf->RoundedRect($posx, $posy, $width , 20, 3, '1111', '');
-			$pdf->RoundedRect($posx , $posy, $width , 5, 3, '1001', 'F');
-			$pdf->MultiCell($width, 5, $langs->trans("DelivryAddress"), '', 'C');
+			$pdf->RoundedRect($posx , $posy, $width , 3, 3, '1001', 'F');
+			$pdf->MultiCell($width, 3, $langs->trans("DelivryAddress"), '', 'C');
 		}
 
 		// 3 - 
@@ -1692,7 +1692,7 @@ class pdf_azur extends ModelePDFPropales
 				$resql = $this->db->query($sql);
 				$row = $this->db->fetch_row($resql);
 				$idusertmp = $row[2];
-				$usertmp=new User($this->db);
+				$usertmp = new User($this->db);
 				$usertmp->fetch($idusertmp);
 				$pdf->MultiCell($width, 3, $usertmp->getFullName($langs), '', 'L');
 				$pdf->MultiCell($width, 3, $usertmp->email, '', 'L');
