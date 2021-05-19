@@ -1530,19 +1530,6 @@ class pdf_azur extends ModelePDFPropales
 			$pdf->MultiCell(100, 3, $outputlangs->transnoentities("CustomerCode")." : ".$outputlangs->transnoentities($object->thirdparty->code_client), '', 'R');
 		}
 
-		// Get contact
-		if (!empty($conf->global->DOC_SHOW_FIRST_SALES_REP)) {
-			$arrayidcontact = $object->getIdContact('internal', 'SALESREPFOLL');
-			if (count($arrayidcontact) > 0) {
-				$usertmp = new User($this->db);
-				$usertmp->fetch($arrayidcontact[0]);
-				$posy += 4;
-				$pdf->SetXY($posx, $posy);
-				$pdf->SetTextColor(0, 0, 60);
-				$pdf->MultiCell(100, 3, $langs->trans("SalesRepresentative")." : ".$usertmp->getFullName($langs), '', 'R');
-			}
-		}
-
 		$posy += 2;
 
 		$top_shift = 0;
@@ -1647,6 +1634,72 @@ class pdf_azur extends ModelePDFPropales
 			$pdf->MultiCell($widthrecbox, 4, $carac_client, 0, $ltrdirection);
 		}
 
+		$width = ($this->page_largeur - $this->marge_gauche - $this->marge_droite)/3 - 5;
+
+		// 1 - Info warehouse and sales rep -- BB2A
+		if (!empty($conf->global->DOC_SHOW_FIRST_SALES_REP) || !empty($conf->global->DOC_SHOW_WAREHOUSE) || !empty($conf->global->DOC_SHOW_DELIVRY_ADDRESS)) {
+			$posy += 30 + $top_shift;
+			$posx = $this->marge_gauche;
+			$top_shift += 20;
+			$pdf->SetXY($posx, $posy);
+			$pdf->SetTextColor(0, 0, 60);
+		}
+		if (!empty($conf->global->DOC_SHOW_WAREHOUSE)) {
+			$pdf->RoundedRect($posx , $posy, $width , 20, 3, '1111', '');
+			$pdf->RoundedRect($posx , $posy, $width , 5, 3, '1001', 'F');
+			$pdf->MultiCell($width, 5, $langs->trans("Wharehouse"), '', 'C');
+			$warehouse = new Entrepot($this->db);
+			$warehouse->fetch($object->fk_warehouse);
+			var_dump($object->fk_warehouse);
+			$warehouse = pdf_build_address($outputlangs, $this->emetteur, $warehouse, '', '', $mode, $object);
+			$pdf->MultiCell($width, 100, $warehouse, '', 'L');
+		}
+
+		// 2 - Delivry address
+		if (!empty($conf->global->DOC_SHOW_DELIVRY_ADDRESS)) {
+			$posx = ($this->page_largeur - $this->marge_droite - $this->marge_gauche) / 2 - $width / 2 + ($this->marge_gauche - $this->marge_droite) + 5;
+			$pdf->SetXY($posx, $posy);
+			$pdf->SetTextColor(0, 0, 60);
+
+			$pdf->RoundedRect($posx, $posy, $width , 20, 3, '1111', '');
+			$pdf->RoundedRect($posx , $posy, $width , 5, 3, '1001', 'F');
+			$pdf->MultiCell($width, 5, $langs->trans("DelivryAddress"), '', 'C');
+		}
+
+		// 3 - 
+		if (!empty($conf->global->DOC_SHOW_FIRST_SALES_REP) || !empty($conf->global->DOC_SHOW_WAREHOUSE)) {
+			$posx = $this->page_largeur - $this->marge_droite - $width;
+			$pdf->SetXY($posx, $posy);
+			$pdf->SetTextColor(0, 0, 60);
+
+			$pdf->RoundedRect($posx, $posy, $width , 20, 3, '1111', '');
+			$pdf->RoundedRect($posx , $posy, $width , 3, 3, '1001', 'F');
+			$pdf->MultiCell($width, 3, $langs->trans("SalesRepresentative"), '', 'C');
+		}
+		// Get contact
+		if (!empty($conf->global->DOC_SHOW_FIRST_SALES_REP)) {
+			$arrayidcontact = $object->getIdContact('internal', 'SALESREPFOLL');
+			if (count($arrayidcontact) > 0) {
+				$usertmp = new User($this->db);
+				$usertmp->fetch($arrayidcontact[0]);
+				
+				$pdf->MultiCell($width, 3, $usertmp->getFullName($langs), '', 'L');
+				$pdf->MultiCell($width, 3, $usertmp->email, '', 'L');
+			} else {
+				$sql = "SELECT * FROM ".MAIN_DB_PREFIX."societe_commerciaux";
+				$sql.= " WHERE fk_soc = ".$object->thirdparty->id;
+				$sql.= " ORDER BY rowid";
+				$resql = $this->db->query($sql);
+				$row = $this->db->fetch_row($resql);
+				$idusertmp = $row[2];
+				$usertmp=new User($this->db);
+				$usertmp->fetch($idusertmp);
+				$pdf->MultiCell($width, 3, $usertmp->getFullName($langs), '', 'L');
+				$pdf->MultiCell($width, 3, $usertmp->email, '', 'L');
+				$pdf->MultiCell($width, 3, $usertmp->office_phone, '', 'L');
+			}
+		}
+		//$entrepotuser = new Entrepot($this->db);
 		$pdf->SetTextColor(0, 0, 0);
 		return $top_shift;
 	}
