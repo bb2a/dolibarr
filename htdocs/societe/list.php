@@ -372,6 +372,7 @@ if (empty($reshook)) {
 	$objectclass = 'Societe';
 	$objectlabel = 'ThirdParty';
 	$permissiontoread = $user->rights->societe->lire;
+	$permissiontoreadall = $user->rights->societe->client->voir;
 	$permissiontodelete = $user->rights->societe->supprimer;
 	$permissiontoadd = $user->rights->societe->creer;
 	$uploaddir = $conf->societe->dir_output;
@@ -859,16 +860,40 @@ $arrayofmassactions = array(
 //    'builddoc'=>img_picto('', 'pdf', 'class="pictofixedwidth"').$langs->trans("PDFMerge"),
 );
 //if($user->rights->societe->creer) $arrayofmassactions['createbills']=$langs->trans("CreateInvoiceForThisCustomer");
-if ($user->rights->societe->supprimer) {
+if ($permissiontodelete) {
 	$arrayofmassactions['predelete'] = img_picto('', 'delete', 'class="pictofixedwidth"').$langs->trans("Delete");
 }
-if ($user->rights->societe->creer) {
+if ($permissiontoadd && $permissiontoreadall) {
+	$arrayofmassactions['preaddsalesrep'] = img_picto('', 'user', 'class="pictofixedwidth"').$langs->trans("AllocateCommercial");
+}
+if ($permissiontoadd) {
 	$arrayofmassactions['preaffecttag'] = img_picto('', 'category', 'class="pictofixedwidth"').$langs->trans("AffectTag");
 }
 if (GETPOST('nomassaction', 'int') || in_array($massaction, array('presend', 'predelete', 'preaffecttag'))) {
 	$arrayofmassactions = array();
 }
 $massactionbutton = $form->selectMassAction('', $arrayofmassactions);
+
+if ($massaction == 'preaddsalesrep') {
+//	print $form->formconfirm($_SERVER["PHP_SELF"], $langs->trans("ConfirmMassValidation"), $langs->trans("ConfirmMassValidationQuestion"), "validate", null, '', 0, 200, 500, 1);
+
+		//Form to close proposal (signed or not)
+		$formquestion = array(
+			array('type' => 'select', 'name' => 'salesrep', 'label' => '<span class="fieldrequired">'.$langs->trans("SaleRepresentativeLastname").'</span>', 'values' => array(3 => 'a.berton', 4 => 'j.guignolet')),
+//			array('type' => 'text', 'name' => 'note_private', 'label' => $langs->trans("Note"), 'value' => '')				// Field to complete private note (not replace)
+		);
+
+		/*if (!empty($conf->notification->enabled)) {
+			require_once DOL_DOCUMENT_ROOT.'/core/class/notify.class.php';
+			$notify = new Notify($db);
+			$formquestion = array_merge($formquestion, array(
+				array('type' => 'onecolumn', 'value' => $notify->confirmMessage('PROPAL_CLOSE_SIGNED', $object->socid, $object)),
+			));
+		}	*/	
+		$formconfirm = $form->formconfirm($_SERVER["PHP_SELF"], $langs->trans('AllocateCommercial'), $text, 'confirm_addsalesrep', $formquestion, '', 1, 200);
+print $formconfirm;
+
+}
 
 $typefilter = '';
 $label = 'MenuNewThirdParty';
